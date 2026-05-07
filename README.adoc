@@ -1,5 +1,4 @@
 # web-commerce-projet
-https://render.com/register
 Site e-commerce développé dans le cadre d'un stage informatique
 
 == Contexte
