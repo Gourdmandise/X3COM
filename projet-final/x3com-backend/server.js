@@ -916,6 +916,8 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
 
     const numeroFacture = creerNumeroFacture(commande.id);
     const montantTTC = parseFloat(commande.prix) || 0;
+    const texteOffre = `${offre?.nom || ''} ${offre?.description || ''}`;
+    const doeApplicable = /pré[- ]?câblage|prec[- ]?cablage|préfibrage|pre[- ]?fibrage/i.test(texteOffre);
 
     if (!isFinite(montantTTC)) {
       console.error(`✗ Prix invalide pour commande ${commande.id}: ${commande.prix}`);
@@ -1021,16 +1023,20 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
     doc.fontSize(9).fillColor('#111827').fillAndStroke('#f3f4f6');
     doc.rect(40, rowY, 525, 20).stroke();
 
-    const doePrixAffiche = 400;
-    const doeQuantite = 1;
-    const doeTva = 20;
+    if (doeApplicable) {
+      const doePrixAffiche = 400;
+      const doeQuantite = 1;
+      const doeTva = 20;
 
-    doc.fillColor('#111827')
-      .text('DOE : Remise des documents pour l\'exploitation du Réseau', cols.desc + 2, rowY + 4, { width: colWidths.desc, lineBreak: false })
-      .text(String(doeQuantite).replace('.', ','), cols.lgt + 2, rowY + 4, { width: colWidths.lgt, align: 'center', lineBreak: false })
-      .text(`${doePrixAffiche.toFixed(2)} €`, cols.pu + 2, rowY + 4, { width: colWidths.pu, align: 'right', lineBreak: false })
-      .text(`${doePrixAffiche.toFixed(2)} €`, cols.ht + 2, rowY + 4, { width: colWidths.ht, align: 'right', lineBreak: false })
-      .text(`${doeTva}`, cols.tva + 2, rowY + 4, { width: colWidths.tva, align: 'right', lineBreak: false });
+      doc.fillColor('#111827')
+        .text('DOE : Remise des documents pour l\'exploitation du Réseau', cols.desc + 2, rowY + 4, { width: colWidths.desc, lineBreak: false })
+        .text(String(doeQuantite).replace('.', ','), cols.lgt + 2, rowY + 4, { width: colWidths.lgt, align: 'center', lineBreak: false })
+        .text(`${doePrixAffiche.toFixed(2)} €`, cols.pu + 2, rowY + 4, { width: colWidths.pu, align: 'right', lineBreak: false })
+        .text(`${doePrixAffiche.toFixed(2)} €`, cols.ht + 2, rowY + 4, { width: colWidths.ht, align: 'right', lineBreak: false })
+        .text(`${doeTva}`, cols.tva + 2, rowY + 4, { width: colWidths.tva, align: 'right', lineBreak: false });
+
+      rowY += 22;
+    }
 
     doc.moveDown(2);
 

@@ -70,9 +70,24 @@ export class Paiement implements OnInit {
 
   get prixUnitaire(): number { return this.panier.offre()?.prix ?? 0; }
 
+  get appliqueDoe(): boolean {
+    const offre = this.panier.offre();
+    const texte = `${offre?.nom ?? ''} ${offre?.description ?? ''}`;
+    return /pré[- ]?câblage|prec[- ]?cablage|préfibrage|pre[- ]?fibrage/i.test(texte);
+  }
+
+  get supplementDoe(): number {
+    return this.appliqueDoe ? 400 : 0;
+  }
+
   // TVA incluse dans le prix TTC : tva = total × 20/120
   get tva()   { return Math.round(this.total * 20 / 120); }
-  get total() { return this.estParLogement ? this.prixUnitaire * (this.nombreLogements || this.minLogements) : this.prixUnitaire; }
+  get total() {
+    const base = this.estParLogement
+      ? this.prixUnitaire * (this.nombreLogements || this.minLogements)
+      : this.prixUnitaire;
+    return base + this.supplementDoe;
+  }
 
   incLogements(): void {
     if (this.nombreLogements < this.maxLogements) this.nombreLogements++;
