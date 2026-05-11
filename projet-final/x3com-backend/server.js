@@ -918,6 +918,8 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
     const montantTTC = parseFloat(commande.prix) || 0;
     const texteOffre = `${offre?.nom || ''} ${offre?.description || ''}`;
     const doeApplicable = /pré[- ]?câblage|prec[- ]?cablage|préfibrage|pre[- ]?fibrage/i.test(texteOffre);
+    const doeMontantTTC = doeApplicable ? 400 : 0;
+    const montantLogementsTTC = Math.max(0, montantTTC - doeMontantTTC);
 
     if (!isFinite(montantTTC)) {
       console.error(`✗ Prix invalide pour commande ${commande.id}: ${commande.prix}`);
@@ -926,6 +928,9 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
 
     const montantHT = parseFloat((montantTTC / 1.20).toFixed(2));
     const montantTVA = parseFloat((montantTTC - montantHT).toFixed(2));
+
+    const montantLogementsHT = parseFloat((montantLogementsTTC / 1.20).toFixed(2));
+    const montantLogementsTVA = parseFloat((montantLogementsTTC - montantLogementsHT).toFixed(2));
 
     // Extraire le nombre de logements des notes
     const notesMatch = commande.notes?.match(/(\d+)\s+logement/i);
@@ -1008,14 +1013,14 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
     doc.rect(40, rowY, 525, lineHeight).stroke();
 
     const descriptionArticle = offre?.nom || 'Prestation';
-    const prixUnitaire = parseFloat((montantTTC / nombreLogements).toFixed(2));
+    const prixUnitaire = parseFloat((montantLogementsTTC / nombreLogements).toFixed(2));
 
     doc.fillColor('#111827')
       .text(descriptionArticle, cols.desc + 2, rowY + 7, { width: colWidths.desc, lineBreak: false })
       .text(String(nombreLogements), cols.lgt + 2, rowY + 7, { width: colWidths.lgt, align: 'center', lineBreak: false })
       .text(`${prixUnitaire.toFixed(2)} €`, cols.pu + 2, rowY + 7, { width: colWidths.pu, align: 'right', lineBreak: false })
-      .text(`${montantHT.toFixed(2)} €`, cols.ht + 2, rowY + 7, { width: colWidths.ht, align: 'right', lineBreak: false })
-      .text(`${montantTVA.toFixed(2)} €`, cols.tva + 2, rowY + 7, { width: colWidths.tva, align: 'right', lineBreak: false });
+      .text(`${montantLogementsHT.toFixed(2)} €`, cols.ht + 2, rowY + 7, { width: colWidths.ht, align: 'right', lineBreak: false })
+      .text(`${montantLogementsTVA.toFixed(2)} €`, cols.tva + 2, rowY + 7, { width: colWidths.tva, align: 'right', lineBreak: false });
 
     rowY += lineHeight + 2;
 
@@ -1024,7 +1029,7 @@ app.get('/commandes/:id/pdf', requireAuth, async (req, res) => {
     doc.rect(40, rowY, 525, 20).stroke();
 
     if (doeApplicable) {
-      const doePrixAffiche = 400;
+      const doePrixAffiche = doeMontantTTC;
       const doeQuantite = 1;
       const doeTva = 20;
 
