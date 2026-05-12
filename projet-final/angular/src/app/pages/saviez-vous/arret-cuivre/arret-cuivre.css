@@ -23,4 +23,6 @@
 .ac-sug-cp{font-size:12px;color:#00B4D8;font-weight:700;background:rgba(0,180,216,0.1);padding:2px 8px;border-radius:20px;white-space:nowrap}
 .ac-search-box:focus-within{border-radius:12px 12px 0 0}
 
+.sv-source{font-size:13px;color:#4A6275;margin:14px 0 0;line-height:1.5}
+
 @media(max-width:768px){.sv-alert{padding:14px 20px;font-size:13px}}
