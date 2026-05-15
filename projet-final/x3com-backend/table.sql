@@ -110,3 +110,6 @@ INSERT INTO offres (nom, prix, description, features, options, surface, populair
   'Sur devis',
   false
 );
+
+
+OLD_DB_URL='postgresql://postgres:ANCIEN_MDP@db.ancien-ref.supabase.co:5432/postgres' NEW_DB_URL='postgresql://postgres:NOUVEAU_MDP@db.nouveau-ref.supabase.co:5432/postgres' ./transfer_supabase.sh
